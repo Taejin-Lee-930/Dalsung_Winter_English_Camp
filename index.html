@@ -1,110 +1,406 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Score Tracker</title>
+    <title>영어 시험 결과 기록</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 0;
+            max-width: 800px;
+            margin: 0 auto;
             padding: 20px;
-            background-color: #f4f4f9;
+            background-color: #f5f5f5;
         }
         .container {
-            max-width: 600px;
-            margin: auto;
-            background: #fff;
+            background-color: white;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        h1 {
-            text-align: center;
+        .form-group {
+            margin-bottom: 15px;
         }
         label {
             display: block;
             margin-bottom: 5px;
             font-weight: bold;
         }
-        input, button {
+        input {
             width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            border: 1px solid #ccc;
             padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .edit-btn {
+            background-color: #2196F3;
+        }
+        .delete-btn {
+            background-color: #f44336;
+        }
+        .save-edit-btn {
+            background-color: #FF9800;
+        }
+        .result-table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+        .result-table th, .result-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .result-table th {
+            background-color: #f2f2f2;
+        }
+        #testSection, #resultSection {
+            display: none;
+        }
+        .admin-notice {
+            color: #ff4444;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .edit-mode input {
+            width: 90%;
+            margin: 2px;
+        }
+        .screenshot-container {
+            margin: 15px 0;
+            padding: 15px;
+            border: 2px dashed #ccc;
+            border-radius: 4px;
             text-align: center;
         }
-        th {
-            background-color: #f8f8f8;
+        .screenshot-preview {
+            max-width: 300px;
+            max-height: 200px;
+            margin: 10px auto;
+            display: none;
+        }
+        .screenshot-label {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .screenshot-label:hover {
+            background-color: #45a049;
+        }
+        #screenshotInput {
+            display: none;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Student Score Tracker</h1>
-        <form id="loginForm">
-            <label for="studentName">Student Name</label>
-            <input type="text" id="studentName" placeholder="Enter your name" required>
-            <label for="score">Exam Score</label>
-            <input type="number" id="score" placeholder="Enter your score" required>
-            <button type="button" onclick="addScore()">Submit Score</button>
-        </form>
+        <div id="loginSection">
+            <h2>(재)달성교육재단 겨울방학 집중영어교실 레벨테스트</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="name">이름:</label>
+                    <input type="text" id="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="school">학교:</label>
+                    <input type="text" id="school" required>
+                </div>
+                <button type="submit">로그인</button>
+            </form>
+        </div>
 
-        <table id="scoreTable">
-            <thead>
-                <tr>
-                    <th>Student Name</th>
-                    <th>Score</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Scores will be dynamically added here -->
-            </tbody>
-        </table>
+        <div id="testSection">
+            <h2>영어 시험</h2>
+            <p>안녕하세요, <span id="userName"></span>님!</p>
+            <p>아래 버튼을 클릭하여 영어 시험을 시작해주세요.</p>
+            <button onclick="window.open('https://www.cambridgeenglish.org/test-your-english/young-learners/', '_blank')">
+                시험 시작하기
+            </button>
+            <button onclick="showResultSection()">시험 완료</button>
+        </div>
+
+        <div id="resultSection">
+            <h2>시험 결과 입력</h2>
+            <div class="form-group">
+                <label for="score">점수:</label>
+                <input type="number" id="score" min="0" max="100" required>
+            </div>
+            <div class="form-group screenshot-container">
+                <label for="screenshotInput" class="screenshot-label">
+                    시험 결과 스크린샷 업로드
+                </label>
+                <input type="file" 
+                       id="screenshotInput" 
+                       accept="image/*" 
+                       onchange="previewScreenshot(this)">
+                <div class="preview-container">
+                    <img id="screenshotPreview" 
+                         class="screenshot-preview" 
+                         src="#" 
+                         alt="스크린샷 미리보기">
+                </div>
+            </div>
+            <button onclick="saveResult()">결과 저장</button>
+
+            <h3>시험 결과</h3>
+            <div id="adminControls" style="display: none;">
+                <p class="admin-notice">관리자 계정으로 로그인하셨습니다. 전체 결과를 확인하고 편집할 수 있습니다.</p>
+            </div>
+            <table class="result-table">
+                <thead>
+                    <tr>
+                        <th>날짜</th>
+                        <th>시간</th>
+                        <th>이름</th>
+                        <th>학교</th>
+                        <th>점수</th>
+                        <th>스크린샷</th>
+                        <th id="actionColumn" style="display: none;">관리</th>
+                    </tr>
+                </thead>
+                <tbody id="resultTableBody">
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <script>
-        // Array to store student scores
-        const scores = [];
+        const ADMIN_NAME = '달성교육재단';
+        const ADMIN_SCHOOL = '6255325';
+        let isAdmin = false;
+        let currentUserName = '';
 
-        function addScore() {
-            const studentName = document.getElementById("studentName").value;
-            const score = document.getElementById("score").value;
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const school = document.getElementById('school').value;
+            
+            isAdmin = (name === ADMIN_NAME && school === ADMIN_SCHOOL);
+            currentUserName = name;
 
-            if (studentName && score) {
-                // Add to the scores array
-                scores.push({ name: studentName, score: Number(score) });
+            document.getElementById('userName').textContent = name;
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('testSection').style.display = 'block';
+            
+            localStorage.setItem('currentUser', JSON.stringify({ name, school }));
 
-                // Update the table
-                updateTable();
+            if (isAdmin) {
+                document.getElementById('adminControls').style.display = 'block';
+                document.getElementById('actionColumn').style.display = 'table-cell';
+            }
+        });
 
-                // Clear the form
-                document.getElementById("loginForm").reset();
-            } else {
-                alert("Please fill out all fields.");
+        function previewScreenshot(input) {
+            const preview = document.getElementById('screenshotPreview');
+            const file = input.files[0];
+            
+            if (file) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+                
+                reader.readAsDataURL(file);
             }
         }
 
-        function updateTable() {
-            const tableBody = document.getElementById("scoreTable").querySelector("tbody");
-            tableBody.innerHTML = ""; // Clear the table
+        function showResultSection() {
+            document.getElementById('resultSection').style.display = 'block';
+            displayResults();
+        }
 
-            // Populate with updated scores
-            scores.forEach((entry) => {
-                const row = document.createElement("tr");
-                row.innerHTML = `<td>${entry.name}</td><td>${entry.score}</td>`;
-                tableBody.appendChild(row);
+        function saveResult() {
+            const score = document.getElementById('score').value;
+            const screenshot = document.getElementById('screenshotPreview').src;
+            
+            if (!score) {
+                alert('점수를 입력해주세요.');
+                return;
+            }
+
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            const now = new Date();
+            const result = {
+                id: Date.now(),
+                date: now.toLocaleDateString(),
+                time: now.toLocaleTimeString(),
+                name: currentUser.name,
+                school: currentUser.school,
+                score: score,
+                screenshot: screenshot
+            };
+
+            let results = JSON.parse(localStorage.getItem('testResults')) || [];
+            results.push(result);
+            localStorage.setItem('testResults', JSON.stringify(results));
+
+            displayResults();
+            document.getElementById('score').value = '';
+            document.getElementById('screenshotPreview').style.display = 'none';
+            document.getElementById('screenshotInput').value = '';
+            alert('결과가 저장되었습니다.');
+        }
+
+        function displayResults() {
+            const results = JSON.parse(localStorage.getItem('testResults')) || [];
+            const tableBody = document.getElementById('resultTableBody');
+            tableBody.innerHTML = '';
+
+            const filteredResults = isAdmin ? results : results.filter(result => result.name === currentUserName);
+
+            filteredResults.forEach(result => {
+                const row = tableBody.insertRow();
+                if (!isAdmin) {
+                    row.insertCell().textContent = result.date;
+                    row.insertCell().textContent = result.time;
+                    row.insertCell().textContent = result.name;
+                    row.insertCell().textContent = result.school;
+                    row.insertCell().textContent = result.score;
+                    
+                    const screenshotCell = row.insertCell();
+                    if (result.screenshot && result.screenshot !== '#') {
+                        const img = document.createElement('img');
+                        img.src = result.screenshot;
+                        img.style.maxWidth = '100px';
+                        img.style.cursor = 'pointer';
+                        img.onclick = () => window.open(result.screenshot);
+                        screenshotCell.appendChild(img);
+                    }
+                } else {
+                    row.setAttribute('data-id', result.id);
+                    row.insertCell().textContent = result.date;
+                    row.insertCell().textContent = result.time;
+                    row.insertCell().textContent = result.name;
+                    row.insertCell().textContent = result.school;
+                    row.insertCell().textContent = result.score;
+                    
+                    const screenshotCell = row.insertCell();
+                    if (result.screenshot && result.screenshot !== '#') {
+                        const img = document.createElement('img');
+                        img.src = result.screenshot;
+                        img.style.maxWidth = '100px';
+                        img.style.cursor = 'pointer';
+                        img.onclick = () => window.open(result.screenshot);
+                        screenshotCell.appendChild(img);
+                    }
+                    
+                    const actionCell = row.insertCell();
+                    const editBtn = document.createElement('button');
+                    editBtn.textContent = '수정';
+                    editBtn.className = 'edit-btn';
+                    editBtn.onclick = () => editRow(row, result);
+                    
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.textContent = '삭제';
+                    deleteBtn.className = 'delete-btn';
+                    deleteBtn.onclick = () => deleteRow(result.id);
+                    
+                    actionCell.appendChild(editBtn);
+                    actionCell.appendChild(deleteBtn);
+                }
             });
+        }
+
+        function editRow(row, result) {
+            row.innerHTML = `
+                <td><input type="text" value="${result.date}" class="edit-date"></td>
+                <td><input type="text" value="${result.time}" class="edit-time"></td>
+                <td><input type="text" value="${result.name}" class="edit-name"></td>
+                <td><input type="text" value="${result.school}" class="edit-school"></td>
+                <td><input type="number" value="${result.score}" class="edit-score"></td>
+                <td>${result.screenshot && result.screenshot !== '#' ? `<img src="${result.screenshot}" style="max-width: 100px;">` : ''}
+                    <input type="file" accept="image/*" class="edit-screenshot" onchange="previewEditScreenshot(this)">
+                </td>
+                <td>
+                    <button class="save-edit-btn" onclick="saveEdit(${result.id})">저장</button>
+                    <button class="delete-btn" onclick="cancelEdit()">취소</button>
+                </td>
+            `;
+        }
+
+        function previewEditScreenshot(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = input.parentElement.querySelector('img') || document.createElement('img');
+                    img.src = e.target.result;
+                    img.style.maxWidth = '100px';
+                    if (!input.parentElement.querySelector('img')) {
+                        input.parentElement.insertBefore(img, input);
+                    }
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function saveEdit(id) {
+            const row = document.querySelector(`tr[data-id="${id}"]`);
+            const screenshot = row.querySelector('.edit-screenshot').files[0];
+            const currentScreenshot = row.querySelector('img') ? row.querySelector('img').src : null;
+
+            const newData = {
+                id: id,
+                date: row.querySelector('.edit-date').value,
+                time: row.querySelector('.edit-time').value,
+                name: row.querySelector('.edit-name').value,
+                school: row.querySelector('.edit-school').value,
+                score: row.querySelector('.edit-score').value,
+                screenshot: currentScreenshot
+            };
+
+            if (screenshot) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    newData.screenshot = e.target.result;
+                    updateResults(newData);
+                }
+                reader.readAsDataURL(screenshot);
+            } else {
+                updateResults(newData);
+            }
+        }
+
+        function updateResults(newData) {
+            let results = JSON.parse(localStorage.getItem('testResults')) || [];
+            results = results.map(result => result.id === newData.id ? newData : result);
+            localStorage.setItem('testResults', JSON.stringify(results));
+            
+            displayResults();
+            alert('수정이 완료되었습니다.');
+        }
+
+        function deleteRow(id) {
+            if (confirm('정말 이 결과를 삭제하시겠습니까?')) {
+                let results = JSON.parse(localStorage.getItem('testResults')) || [];
+                results = results.filter(result => result.id !== id);
+                localStorage.setItem('testResults', JSON.stringify(results));
+                displayResults();
+                alert('삭제되었습니다.');
+            }
+        }
+
+        function cancelEdit() {
+            displayResults();
         }
     </script>
 </body>
